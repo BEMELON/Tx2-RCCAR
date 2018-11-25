@@ -15,9 +15,9 @@ for xml in xmls:
     print(xml)
     imgpath = r"../../Tx2-RCCAR/shoes_data/shoe-pics/" + xml[:-4] + ".jpg"
     img = None
-    if os.path.isfile(imgpath):
+    try:
         img = Image.open(imgpath)
-    else :
+    exce`pt:
         continue
     txt = open("../" + xml[:-4] + ".txt" , "w")
     dw = 1./img.size[0]
