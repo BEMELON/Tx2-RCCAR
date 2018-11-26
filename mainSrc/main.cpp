@@ -29,12 +29,17 @@ SOFTWARE.
 #include <time.h>
 #include <JHPWMPCA9685.h>
 
+// Calibrated for main BLDC motor
+#define PWM_FULL_REVERSE 1241 // 1ms / 3.3ms * 4096
+#define PWM_NEUTRAL 1861 // 1.5ms / 3.3ms * 4096
+#define PWM_FULL_FORWARD 2482 // 2ms / 3.3ms * 4096
+
+#define SERVO_CHANNEL 10
+#define ESC_CHANNEL 8
 
 // Calibrated for a Robot Geek RGS-13 Servo
-// Make sure these are appropriate for the servo being used!
-int servoMin = 120 ;
-int servoMax = 720 ;
-
+int servoMin = 120;
+int servoMax = 720;
 
 int getkey() {
     int character;
@@ -63,7 +68,7 @@ int getkey() {
 // This is used to map the servo values to degrees
 // e.g. map(90,0,180,servoMin, servoMax)
 // Maps 90 degrees to the servo value
-
+// 체크
 int map ( int x, int in_min, int in_max, int out_min, int out_max) {
     int toReturn =  (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min ;
     // For debugging:
@@ -72,7 +77,7 @@ int map ( int x, int in_min, int in_max, int out_min, int out_max) {
 }
 
 int main() {
-    PCA9685 *pca9685 = new PCA9685() ;
+    PCA9685 *pca9685 = new PCA9685();
     int err = pca9685->openPCA9685();
     if (err < 0){
         printf("Error: %d", pca9685->error);
@@ -85,12 +90,12 @@ int main() {
         printf("Hit ESC key to exit\n");
         while(pca9685->error >= 0 && getkey() != 27){
 
-            pca9685->setPWM(0,0,servoMin) ;
-            pca9685->setPWM(1,0,servoMin) ;
+            pca9685->setPWM(SERVO_CHANNEL,0,servoMin);
+            pca9685->setPWM(ESC_CHANNEL,0,servoMin);
 
-            pca9685->setPWM(0,0,servoMax) ;
-            pca9685->setPWM(1,0,map(90,0,180,servoMin, servoMax)) ;
-            sleep(2) ;
+            pca9685->setPWM(SERVO_CHANNEL,0,servoMax);
+            pca9685->setPWM(ESC_CHANNEL,0,map(90,0,180,servoMin, servoMax));
+            sleep(2);
         }
         pca9685->setPWM(1,0,map(0,0,180,servoMin, servoMax));
         pca9685->setPWM(0,0,map(90,0,180,servoMin, servoMax));
