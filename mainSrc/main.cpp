@@ -29,6 +29,16 @@ SOFTWARE.
 #include <time.h>
 #include <JHPWMPCA9685.h>
 
+// for pipe communication
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+// Debug mode
+// #define DEBUG
+
+
+
 // Calibrated for main BLDC motor
 #define PWM_FULL_REVERSE 1241 // 1ms / 3.3ms * 4096
 #define PWM_NEUTRAL 1861 // 1.5ms / 3.3ms * 4096
@@ -36,10 +46,6 @@ SOFTWARE.
 
 #define SERVO_CHANNEL 10
 #define ESC_CHANNEL 8
-
-// Calibrated for a Robot Geek RGS-13 Servo
-int servoMin = 120;
-int servoMax = 720;
 
 int getkey() {
     int character;
@@ -85,21 +91,72 @@ int main() {
         printf("PCA9685 Device Address: 0x%02X\n",pca9685->kI2CAddress) ;
         pca9685->setAllPWM(0,0) ;
         pca9685->reset() ;
-        pca9685->setPWMFrequency(300) ;
+        pca9685->setPWMFrequency(300);
+	sleep(1);
+
+	pca9685->setPWM(ESC_CHANNEL, 0, PWM_NEUTRAL);
+	pca9685->setPWM(SERVO_CHANNEL, 0, PWM_NEUTRAL);
+#ifdef DEBUG
         // 27 is the ESC key
         printf("Hit ESC key to exit\n");
+	int PWM = PWM_NEUTRAL;
+        pca9685->setPWM(ESC_CHANNEL,0, PWM + 150);
         while(pca9685->error >= 0 && getkey() != 27){
 
-            pca9685->setPWM(SERVO_CHANNEL,0,servoMin);
-            pca9685->setPWM(ESC_CHANNEL,0,servoMin);
+            pca9685->setPWM(SERVO_CHANNEL,0,PWM);
 
-            pca9685->setPWM(SERVO_CHANNEL,0,servoMax);
-            pca9685->setPWM(ESC_CHANNEL,0,map(90,0,180,servoMin, servoMax));
-            sleep(2);
+	    int mode;
+	    printf("Enter 1 for PWM + 100\n\t2 for PWM -100\n\t3 for Neural\n");
+	    scanf("%d", &mode);
+	    switch(mode){
+		case 1:
+		  PWM += 10; break;
+		case 2:
+		  PWM -= 10; break;
+		case 3:
+		  PWM = PWM_NEUTRAL; break;
+		case 4:
+		  goto exit;
+	    }
         }
-        pca9685->setPWM(1,0,map(0,0,180,servoMin, servoMax));
-        pca9685->setPWM(0,0,map(90,0,180,servoMin, servoMax));
-        sleep(1);
-    }
+	exit:
+#endif
+
+#ifndef DEBUG
+	
+	//int yolo = mkfifo("/tmp/yoloPipe", S_IRUSR);
+	int yolo = open("/tmp/yoloPipe", 0666);
+
+	char buffer[128];
+	memset(buffer, sizeof(char), 128 * sizeof(char));
+        pca9685->setPWM(ESC_CHANNEL,0, PWM_NEUTRAL + 150);
+	
+	while(getkey() != 27){
+		if (read(yolo, buffer, 128) > 0 ){
+			// buffer -> 9985 ( means 0.9985)
+			// 0.5 -> middle of ZED Cam.
+			double pos = 0.75 - (atoi(buffer) / 10000.0); 
+			int PWM = 0;
+			if (pos < 0)
+				PWM = PWM_NEUTRAL * pos;
+			else
+				PWM = PWM_NEUTRAL * (1 + pos);
+			printf("XPOS : %lf, PWM: %lf\n", pos, PWM);
+
+			if (PWM >= PWM_FULL_FORWARD) 
+				PWM = PWM_FULL_FORWARD;
+			else if (PWM <= PWM_FULL_REVERSE) 
+				PWM = PWM_FULL_REVERSE;
+	
+			pca9685->setPWM(SERVO_CHANNEL, 0, PWM);
+			sleep(0.8);
+		}
+	}
+#endif
+
+    sleep(1);
+    pca9685->setPWM(SERVO_CHANNEL, 0, PWM_NEUTRAL);
+    pca9685->setPWM(ESC_CHANNEL, 0, PWM_NEUTRAL);
     pca9685->closePCA9685();
+    }
 }
