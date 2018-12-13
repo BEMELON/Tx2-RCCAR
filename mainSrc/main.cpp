@@ -138,7 +138,7 @@ int main() {
 			double pos = 0.75 - (atoi(buffer) / 10000.0); 
 			int PWM = 0;
 			if (pos < 0)
-				PWM = PWM_NEUTRAL * pos;
+				PWM = PWM_NEUTRAL * (1 - pos);
 			else
 				PWM = PWM_NEUTRAL * (1 + pos);
 			printf("XPOS : %lf, PWM: %lf\n", pos, PWM);
