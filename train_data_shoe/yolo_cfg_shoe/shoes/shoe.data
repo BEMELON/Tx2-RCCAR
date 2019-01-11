@@ -1,0 +1,5 @@
+classes = 1
+train = data/train.txt
+vaild = data/test.txt
+names = data/shoe.names
+backup = backup
