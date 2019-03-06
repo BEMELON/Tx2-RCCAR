@@ -27,7 +27,7 @@ SOFTWARE.
 #include <string.h>
 #include <termios.h>
 #include <time.h>
-#include <JHPWMPCA9685.h>
+#include "../include/PCA9685/JHPWMPCA9685.h"
 
 // for pipe communication
 #include <sys/types.h>
