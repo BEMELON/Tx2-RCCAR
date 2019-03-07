@@ -19,7 +19,7 @@ ESC and BLDC motor : [TRACKSTAR SET](https://hobbyking.com/en_us/trackstar-roar-
 
 Lipo-Battery for ESC : [5600mah 2S2P](https://hobbyking.com/en_us/sales/order/view/order_id/7254682)  
 
-Lipo-Battery pack for Jetson Tx2 : [Vinsic 4.5A 19V](https://es.aliexpress.com/item/Vinsic-30000mAh-Quick-Charge-3-0-Powerbank-2-4A-Dual-Output-With-Type-C-Port-External/32792426820.html?spm=2114.10010108.1000023.3.5475c5b6YsvBNP)  
+Lipo-Battery pack for Jetson Tx2 : [5000mah 4S1P](https://hobbyking.com/en_us/turnigy-5000mah-4s1p-14-8v-20c-hardcase-pack-1.html)  
 
 Lidar : [RP Lidar A1](http://www.slamtec.com/en/Lidar/A1)  
 
